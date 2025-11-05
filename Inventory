@@ -1,0 +1,66 @@
+package project212;
+
+import java.util.Scanner;
+import java.io.*;
+
+public class Inventory{
+	public static void main(String args[]){
+		
+		Scanner input = new Scanner(System.in);
+		System.out.println("-- Inventory Management System --");
+		System.out.println("-- Please Select from the following --");
+		System.out.println("1. Register customer");
+		
+		int choice = input.nextInt();
+		switch(choice) {
+		
+		case 1:
+			System.out.println("Enter id:");
+			int id = input.nextInt();
+			System.out.println("Enter name:");
+			input.next();
+			String name = input.nextLine();
+			System.out.println("Enter email:");
+			String email = input.nextLine();
+			Customers customer = new Customers(id ,name, email);
+			System.out.println("you have registered successfully");
+			System.out.println(Customers.customers.retrieve());
+				
+		}
+		/*
+
+		try {
+
+
+			Scanner input = new Scanner(new File("reviews.csv"));
+			input.nextLine();
+			while (input.hasNextLine()) {
+				String[] reviewsData = input.nextLine().split(",");
+				Reviews.getReviews().insert(new Reviews (Integer.parseInt(reviewsData[0]), Integer.parseInt(reviewsData[1]), Integer.parseInt(reviewsData[2]), Integer.parseInt(reviewsData[3]), reviewsData[4]));
+
+			}
+
+
+		}
+
+
+		catch(IOException e){
+			System.out.println("File not found");
+		}
+
+		catch(Exception e){
+			System.out.println("Error found");
+		}
+
+		//to test for the reading
+		Reviews.getReviews().findFirst();
+		while(!Reviews.getReviews().last()) {
+			System.out.println(Reviews.getReviews().retrieve().toString());
+			Reviews.getReviews().findNext();
+		}
+		System.out.println(Reviews.getReviews().retrieve().toString());
+
+	*/
+		
+	}
+}
