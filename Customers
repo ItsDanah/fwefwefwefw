@@ -2,12 +2,15 @@ package project212;
 
 public class Customers {
 
+    //----------------------------------------------------------------------------------//
     // Static list to store all customers in the system
+    // This acts as a global registry of all customers
     static LinkedList<Customers> customers = new LinkedList<>();
 
-    // Each customer has their own order list (previously static, now instance-based for correctness)
+    // Each customer has their own orders list (instance-based to avoid shared orders across customers)
     private LinkedList<Orders> ordersList;
 
+    // Customer attributes
     private int customerId;
     private String name;
     private String email;
@@ -15,95 +18,97 @@ public class Customers {
     //----------------------------------------------------------------------------------//
     // Constructor: called when creating a new customer
     public Customers(int customerId, String name, String email) {
-        this.customerId = customerId;      // set customer ID
-        this.name = name;                  // set name
-        this.email = email;                // set email
-        this.ordersList = new LinkedList<>(); // initialize this customer's orders list
+        this.customerId = customerId;              // store customer ID
+        this.name = name;                          // store name
+        this.email = email;                        // store email
+        this.ordersList = new LinkedList<>();      // initialize this customer's own order list
     }
 
     //----------------------------------------------------------------------------------//
-    // Register a new customer
+    // Register a new customer globally
     public static void registerCustomer(Customers customer) {
-        // Check if customer already exists using searchById
+        // Check if a customer with the same ID already exists
         if (searchById(customer.getCustomerId()) != null) {
             System.out.println("Customer already exists in the system");
-            return; // exit method if customer exists
+            return; // exit if customer exists
         }
 
-        // Add customer to the static list
+        // Insert the customer into the global customer list
         customers.insert(customer);
-        System.out.println("You have been registered.");
+        System.out.println("You have been registered."); // confirmation message
     }
 
     //----------------------------------------------------------------------------------//
     // Place an order for this customer
     public void placeOrder(Orders order) {
-        // Insert order into this customer's orders list
+        // Add the order to this customer's individual orders list
         ordersList.insert(order);
     }
 
     //----------------------------------------------------------------------------------//
-    // View all orders for this customer
+    // View all orders placed by this customer
     public void viewOrderHistory() {
         System.out.println("Orders History:");
 
-        // Check if the list is empty
+        // Check if the customer has any orders
         if (ordersList.empty()) {
             System.out.println("No orders found.");
             return;
         }
 
-        // Start at first order
+        // Start from the first order
         ordersList.findFirst();
 
-        // Loop through orders until the last one
+        // Iterate through all orders until the last one
         while (!ordersList.last()) {
-            System.out.println(ordersList.retrieve()); // print current order
+            System.out.println(ordersList.retrieve()); // print the current order
             ordersList.findNext();                     // move to next order
         }
 
-        // Print last order
+        // Print the last order in the list
         System.out.println(ordersList.retrieve());
     }
 
     //----------------------------------------------------------------------------------//
     // Add a review for a product
+    // Customers can only review products they have ordered
     public void addReview(int productId, int ratingScore, String textComment) {
 
-        // Check if customer has any orders
+        // If customer has no orders, they cannot leave a review
         if (ordersList.empty()) {
             System.out.println("No orders found");
             return;
         }
 
-        boolean available = false;
+        boolean available = false; // flag to track if the product was ordered
 
         // Loop through customer's orders
         ordersList.findFirst();
         while (true) {
-            LinkedList<Products> products = ordersList.retrieve().getProductsList(); // get products in current order
+            // Get the products in the current order
+            LinkedList<Products> products = ordersList.retrieve().getProductsList();
             products.findFirst();
 
+            // Loop through products in this order
             while (true) {
-                // Check if product ID matches
-                if (products.retrieve().getProductId() == productId) {
+                if (products.retrieve().getProductId() == productId) { // check for product match
                     available = true;
-                    break;
+                    break; // product found, exit inner loop
                 }
-                if (products.last()) break; // exit loop at last product
+                if (products.last()) break; // exit if last product reached
                 products.findNext();
             }
 
-            if (available || ordersList.last()) break; // exit if found or last order
+            if (available || ordersList.last()) break; // exit outer loop if found or last order
             ordersList.findNext();
         }
 
-        // Only allow review if product was ordered
+        // Only allow review if product was previously ordered
         if (available) {
-            // Generate a new review ID based on total reviews count
+            // Generate a new review ID based on total number of reviews
             int reviewId = Reviews.getReviews().getSize() + 1;
 
-            // Create and add review
+            // Create a review object and add it to global review list
             Reviews review = new Reviews(reviewId, productId, customerId, ratingScore, textComment);
             Reviews.addReview(review);
 
@@ -114,19 +119,21 @@ public class Customers {
     }
 
     //----------------------------------------------------------------------------------//
-    // Search a customer by their ID
+    // Search a customer in the global list by ID
     public static Customers searchById(int customerId) {
-        if (customers.empty()) return null;
+        if (customers.empty()) return null; // return null if no customers exist
 
+        // Start at first customer
         customers.findFirst();
         while (!customers.last()) {
             if (customers.retrieve().getCustomerId() == customerId) return customers.retrieve();
             customers.findNext();
         }
 
+        // Check last customer
         if (customers.retrieve().getCustomerId() == customerId) return customers.retrieve();
 
-        return null; // not found
+        return null; // return null if not found
     }
 
     //----------------------------------------------------------------------------------//
@@ -143,4 +150,6 @@ public class Customers {
     public String toString() {
         return "Customer ID: " + customerId + " || Name: " + name + " || Email: " + email;
     }
+
+    //----------------------------------------------------------------------------------//
 }
