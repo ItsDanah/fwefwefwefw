@@ -2,151 +2,125 @@ package project212;
 
 public class Reviews {
 
-	private static LinkedList<Reviews> reviews = new LinkedList<>();
-	private int reviewId;
-	private int productId; 
-	private int customerId;
-	private int ratingScore;
-	private String textComment;
+    // Static list to store all reviews in the system
+    private static LinkedList<Reviews> reviews = new LinkedList<>();
 
-	public Reviews( int reviewId, int productId, int customerId, int ratingScore, String textComment) {
-		this.reviewId = reviewId;
-		this.productId = productId;
-		this.customerId = customerId;
-		this.ratingScore = ratingScore;
-		this.textComment = textComment;
-	}
+    private int reviewId;
+    private int productId;
+    private int customerId;
+    private int ratingScore;
+    private String textComment;
 
-	//----------------------------------------------------------------------------------//
+    //----------------------------------------------------------------------------------//
+    // Constructor: initialize review with IDs, score, and comment
+    public Reviews(int reviewId, int productId, int customerId, int ratingScore, String textComment) {
+        this.reviewId = reviewId;
+        this.productId = productId;
+        this.customerId = customerId;
+        this.ratingScore = ratingScore;
+        this.textComment = textComment;
+    }
 
-	public static boolean addReview (Reviews review) {
+    //----------------------------------------------------------------------------------//
+    // Add a new review
+    public static boolean addReview(Reviews review) {
 
-		boolean added = false;
+        // Add to global reviews list
+        reviews.insert(review); // FIX: add review to global list
 
-		reviews.insert(review);
+        // Also add to the specific product's review list
+        Products product = Products.searchById(review.getProductId());
+        if (product != null) {
+            product.addReview(review); // FIX: product review list updated
+            return true;
+        }
 
-		Products tmp = Products.searchById(review.getProductId()); // to insert into the reviews list of the product
-		if (tmp != null) { // if Product exists
-			tmp.addReview( review );
-			added = true;
-		}
-		return added;
+        return false;
+    }
 
-	}
+    //----------------------------------------------------------------------------------//
+    // Edit an existing review
+    public static boolean editReview(int reviewId, int ratingScore, String textComment) {
 
-	//----------------------------------------------------------------------------------//
+        if (reviews.empty()) {
+            System.out.println("No reviews found");
+            return false;
+        }
 
-	public static boolean editReview( int productId, int reviewId, int ratingScore, String textComment) { 
+        boolean edited = false;
 
-		boolean edited = false;
+        reviews.findFirst();
+        while (true) {
+            Reviews r = reviews.retrieve();
+            if (r.getReviewId() == reviewId) {
+                // Update review details in global list
+                r.setRatingScore(ratingScore);
+                r.setTextComment(textComment);
+                edited = true;
 
-		if (reviews.empty()) {
-			System.out.println("No reviews found");
-			return edited;
-		}
+                // Also update review in product's review list
+                Products product = Products.searchById(r.getProductId());
+                if (product != null) {
+                    LinkedList<Reviews> productReviews = product.getReviewsList();
+                    productReviews.findFirst();
+                    while (true) {
+                        Reviews pr = productReviews.retrieve();
+                        if (pr.getReviewId() == reviewId) {
+                            pr.setRatingScore(ratingScore);
+                            pr.setTextComment(textComment);
+                            break;
+                        }
+                        if (productReviews.last()) break;
+                        productReviews.findNext();
+                    }
+                }
+                break;
+            }
 
-		reviews.findFirst();
-		while(!(reviews.last())) {
-			if (reviews.retrieve().getReviewId() == reviewId) {
-				reviews.retrieve().setTextComment(textComment);
-				reviews.retrieve().setRatingScore(ratingScore);
-				edited = true;
-				break;
-			}
-			reviews.findNext();
-		}
-		if (reviews.retrieve().getReviewId() == reviewId) { // for the last element
-			reviews.retrieve().setTextComment(textComment);
-			reviews.retrieve().setRatingScore(ratingScore);
-			edited = true;
-		}
+            if (reviews.last()) break;
+            reviews.findNext();
+        }
 
-		Products tmp = Products.searchById(productId);
-		if (tmp != null) { // if Product exists
-			tmp.addReview(review);
-			added = true;
-			
-		}
-		return edited;
+        return edited;
+    }
 
-	}
+    //----------------------------------------------------------------------------------//
+    // Get average rating for all reviews
+    public static int averageRating() {
+        if (reviews.empty()) return 0;
 
-	//----------------------------------------------------------------------------------//
+        int sum = 0;
+        reviews.findFirst();
+        while (true) {
+            sum += reviews.retrieve().getRatingScore();
+            if (reviews.last()) break;
+            reviews.findNext();
+        }
 
-	public int averageRating() { // done
+        return sum / reviews.getSize();
+    }
 
-		if (reviews.empty()) {
-			System.out.println("No reviews found");
-			return 0;
-		}
+    //----------------------------------------------------------------------------------//
+    // Convert review to string for printing
+    public String toString() {
+        return "Review ID: " + reviewId +
+               " || Product ID: " + productId +
+               " || Customer ID: " + customerId +
+               " || Rating: " + ratingScore +
+               " || Comment: " + textComment;
+    }
 
-		int sum =0;
+    //----------------------------------------------------------------------------------//
+    // Getters and setters
+    public int getReviewId() { return reviewId; }
+    public int getProductId() { return productId; }
+    public int getCustomerId() { return customerId; }
+    public int getRatingScore() { return ratingScore; }
+    public String getTextComment() { return textComment; }
+    public void setRatingScore(int ratingScore) { this.ratingScore = ratingScore; }
+    public void setTextComment(String textComment) { this.textComment = textComment; }
 
-		reviews.findFirst();
-		while(!(reviews.last())) {
-			sum += reviews.retrieve().getRatingScore();
-			reviews.findNext();
-		}
-		sum += reviews.retrieve().getRatingScore(); // for the last element
-
-		int averageRating = sum / reviews.getSize(); // getSize() returns the count of the elements
-		return averageRating;
-	}
-
-	//----------------------------------------------------------------------------------//
-
-	public String toString() {
-		return "Review ID = " + reviewId + " || Product ID = " + productId + " || Customer ID = " + customerId + " || Rating score = " + ratingScore + " || Comment = " + textComment +"\n";
-	}
-
-	public static LinkedList<Reviews> getReviews() {
-		return reviews;
-	}
-
-	public static void setReviews(LinkedList<Reviews> reviews) {
-		Reviews.reviews = reviews;
-	}
-
-	public int getReviewId() {
-		return reviewId;
-	}
-
-	public void setReviewId(int reviewId) {
-		this.reviewId = reviewId;
-	}
-
-	public int getProductId() {
-		return productId;
-	}
-
-	public void setProductId(int productId) {
-		this.productId = productId;
-	}
-
-	public int getCustomerId() {
-		return customerId;
-	}
-
-	public void setCustomerId(int customerId) {
-		this.customerId = customerId;
-	}
-
-	public int getRatingScore() {
-		return ratingScore;
-	}
-
-	public void setRatingScore(int ratingScore) {
-		this.ratingScore = ratingScore;
-	}
-
-	public String getTextComment() {
-		return textComment;
-	}
-
-	public void setTextComment(String textComment) {
-		this.textComment = textComment;
-	}
-
-
-
+    //----------------------------------------------------------------------------------//
+    // Get static list of all reviews
+    public static LinkedList<Reviews> getReviews() { return reviews; } // FIX: added for Inventory access
 }
