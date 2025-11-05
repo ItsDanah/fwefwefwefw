@@ -1,96 +1,101 @@
 package project212;
 
-public class LinkedList<T>{
+// A generic singly linked list implementation
+public class LinkedList<T> {
 
-	private Node<T> head;
-	private Node<T> current;
-	private int size;
+    private Node<T> head;    // First node in the list
+    private Node<T> current; // Current node used for iteration
+    private int size;        // Number of elements in the list
 
-	public LinkedList () {
-		head = current = null;
-		size = 0;
-	}
+    //---- Constructor ----//
+    public LinkedList() {
+        head = current = null;
+        size = 0;
+    }
 
-	public boolean empty () {
-		return head == null;
-	}
+    //---- Check if list is empty ----//
+    public boolean empty() {
+        return head == null;
+    }
 
-	public boolean last () {
-		return current.next == null;
-	}
+    //---- Check if current node is the last ----//
+    public boolean last() {
+        if(current == null) return true; // FIX: prevent NullPointerException
+        return current.next == null;
+    }
 
-	public boolean full () {
-		return false;
-	}
+    //---- Find first element ----//
+    public void findFirst() {
+        current = head;
+    }
 
-	public void findFirst () {
-		current = head;
-	}
+    //---- Move to next element ----//
+    public void findNext() {
+        if(current != null) current = current.next; // FIX: prevent NullPointerException
+    }
 
-	public void findNext () {
-		current = current.next;
-	}
+    //---- Retrieve data at current node ----//
+    public T retrieve() {
+        if(current != null) return current.data;
+        return null;
+    }
 
-	public T retrieve () {
-		return current.data;
-	}
+    //---- Update data at current node ----//
+    public void update(T e) {
+        if(current != null) current.data = e;
+    }
 
-	public void update(T e) {
-		current.data = e;
-	}
+    //---- Insert after current node ----//
+    public void insert(T e) {
+        Node<T> tmp;
+        if (empty()) {
+            current = head = new Node<T>(e);
+        } else {
+            tmp = current.next;
+            current.next = new Node<T>(e);
+            current = current.next;
+            current.next = tmp;
+        }
+        size++;
+    }
 
-	public void insert(T e) {
-		Node<T> tmp;
-		if (empty()) {
-			current = head = new Node<T> (e);
-		}
-		else {
-			tmp = current.next;
-			current.next = new Node<T> (e);
-			current = current.next;
-			current.next = tmp;}
-		size++;
-	}
+    //---- Remove current node ----//
+    public void remove() {
+        if(empty() || current == null) return; // FIX: prevent errors if empty
 
-	public void remove() {
+        if (current == head) {
+            head = head.next;
+        } else {
+            Node<T> tmp = head;
+            while (tmp.next != current)
+                tmp = tmp.next;
+            tmp.next = current.next;
+        }
 
-		if (current == head) {
-			head = head.next;
-		}
-		else {
-			Node<T> tmp = head;
-			while (tmp.next != current)
-				tmp = tmp.next;
-			tmp.next = current.next;
-		}
-		if (current.next == null)
-			current = head;
-		else
-			current = current.next;
-		size--;
-	}
+        if (current.next == null)
+            current = head;
+        else
+            current = current.next;
 
-	public String toString() {
-		String text = "";
-		findFirst();
+        size--;
+    }
 
-		while(!last()) {
-			text += current.data;
-			findNext();
-		}
-		text += current.data;
-		findFirst();
-		return text;
+    //---- Get number of elements ----//
+    public int getSize() {
+        return size;
+    }
 
-	}
-	
-	public int getSize() {
-		return size;
-	}
+    //---- Convert list to string for printing ----//
+    public String toString() {
+        String text = "";
+        if (empty()) return text;
+        findFirst();
+        while (!last()) {
+            text += current.data + "\n";
+            findNext();
+        }
+        text += current.data + "\n";
+        findFirst();
+        return text;
+    }
 }
-
-
-
-
-
-
