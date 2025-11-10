@@ -85,17 +85,4 @@ public class LinkedList<T> {
         return size;
     }
 
-    //---- Convert list to string for printing ----//
-    public String toString() {
-        String text = "";
-        if (empty()) return text;
-        findFirst();
-        while (!last()) {
-            text += current.data + "\n";
-            findNext();
-        }
-        text += current.data + "\n";
-        findFirst();
-        return text;
-    }
 }
