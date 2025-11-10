@@ -37,7 +37,6 @@ public class Products {
 
 		// Insert new product into the global products list
 		products.insert(product);
-		System.out.println("Product added successfully");
 	}
 
 	//----------------------------------------------------------------------------------//
