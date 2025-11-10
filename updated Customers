@@ -35,7 +35,6 @@ public class Customers {
 
         // Insert the customer into the global customer list
         customers.insert(customer);
-        System.out.println("You have been registered."); // confirmation message
     }
 
     //----------------------------------------------------------------------------------//
