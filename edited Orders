@@ -50,7 +50,6 @@ public class Orders {
             System.out.println("Warning: Order has no associated customer");
         }
 
-        System.out.println("Order created successfully");
     }
 
     //----------------------------------------------------------------------------------//
