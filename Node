@@ -1,18 +1,15 @@
 package project212;
 
-// This class represents a single element in a linked list
 public class Node<T> {
     
-    public T data; // The value stored in the node
-    public Node<T> next; // Reference to the next node in the list
+    public T data; 
+    public Node<T> next;
 
-    // Default constructor: empty node
     public Node() {
         data = null;
         next = null;
     }
 
-    // Constructor: create a node with a value
     public Node(T val) {
         data = val;
         next = null;
