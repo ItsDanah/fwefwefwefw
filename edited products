@@ -2,62 +2,60 @@ package project212;
 
 public class Products {
 
-	//----------------------------------------------------------------------------------//
-	// Static list to store all products across the entire system
-	// (Shared among all instances — acts like a global catalog)
+	// Static list holding all products made in the system
 	private static LinkedList<Products> products = new LinkedList<>();
 
-	// Each product holds its own list of reviews (non-static)
-	private LinkedList<Reviews> reviewsList;
-
-	private int productId;
-	private String name;
-	private double price;
-	private int stock;
+	// Each product has its own list of reviews
+	private LinkedList<Reviews> reviewsList; 
+	private int productId; // id of the product
+	private String name; // name of the product
+	private double price; // price of the product
+	private int stock; // the number of this product available
 
 	//----------------------------------------------------------------------------------//
-	// Constructor: used to create a new product with given details
+	// Constructor:
+
 	public Products(int productId, String name, double price, int stock) {
-		this.productId = productId;     // assign product ID
-		this.name = name;               // assign product name
-		this.price = price;             // assign product price
-		this.stock = stock;             // assign available quantity
-		this.reviewsList = new LinkedList<>(); // initialize product-specific reviews list
+		this.productId = productId;
+		this.name = name;
+		this.price = price;
+		this.stock = stock;
+		this.reviewsList = new LinkedList<>();
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Add a new product to the system
+	// Add a new product
+
 	public static void addProducts(Products product) {
-		// Check if a product with the same ID already exists
-		Products searchedProduct = searchById(product.getProductId());
+
+		Products searchedProduct = searchById(product.getProductId()); // Check if product already exists
 		if (searchedProduct != null) {
 			System.out.println("Product already exists");
-			return; // stop if duplicate found
+			return;
 		}
-
-		// Insert new product into the global products list
 		products.insert(product);
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Remove a product from the system by its ID
+	// Remove a product by Id
+
 	public void removeProduct(int productId) {
 		if (products.empty()) {
 			System.out.println("No products found");
 			return;
 		}
 
-		products.findFirst(); // move pointer to the first product
+		products.findFirst();
 		while (!products.last()) {
 			if (products.retrieve().getProductId() == productId) {
-				products.remove(); // remove current product
+				products.remove();
 				System.out.println("Product removed successfully");
 				return;
 			}
-			products.findNext(); // move to next product
+			products.findNext();
 		}
 
-		// Check last node
+		// Checking the last node
 		if (products.retrieve().getProductId() == productId) {
 			products.remove();
 			System.out.println("Product removed successfully");
@@ -67,68 +65,70 @@ public class Products {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Update price and stock for a specific product
+	// Update the price and stock for a product
+
 	public void updateProducts(int productId, double price, int stock) {
-		// Search for product using ID
+
 		Products product = searchById(productId);
 		if (product == null) {
 			System.out.println("No product found with that ID");
 			return;
 		}
-
-		// Update product details
 		product.setPrice(price);
 		product.setStock(stock);
 		System.out.println("Product updated successfully");
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Search product by its unique ID
-	public static Products searchById(int productId) {
-		if (products.empty()) return null;
+	// Search for a product by its ID
 
+	public static Products searchById(int productId) {
+
+		if (products.empty()) 
+			return null;
 		products.findFirst();
 		while (!products.last()) {
 			if (products.retrieve().getProductId() == productId)
-				return products.retrieve(); // return match
+				return products.retrieve();
 			products.findNext();
 		}
-
 		// check last element
 		if (products.retrieve().getProductId() == productId)
 			return products.retrieve();
 
-		return null; // no match found
+		return null;
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Search products by name (case-insensitive, partial match)
+	// Search product by its name
+
 	public static LinkedList<Products> searchByName(String name) {
-		LinkedList<Products> display = new LinkedList<>(); // store matched products
 
-		if (products.empty()) return display;
+		LinkedList<Products> display = new LinkedList<>(); // To store the products
 
+		if (products.empty())
+			return display;
 		products.findFirst();
 		while (!products.last()) {
-			// convert both to lowercase to ignore case
-			if (products.retrieve().getName().toLowerCase().contains(name.toLowerCase()))
+			if (products.retrieve().getName().toLowerCase().contains(name.toLowerCase()))// convert them to lower case to compare 
 				display.insert(products.retrieve());
 			products.findNext();
 		}
-
 		// check last product
 		if (products.retrieve().getName().toLowerCase().contains(name.toLowerCase()))
 			display.insert(products.retrieve());
 
-		return display; // return list of matching results
+		return display;
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Track products that are completely out of stock
+	// Track out of stock products ( stock=0 )
+
 	public static LinkedList<Products> trackOutOfStock() {
 		LinkedList<Products> outOfStock = new LinkedList<>();
 
-		if (products.empty()) return outOfStock;
+		if (products.empty())
+			return outOfStock;
 
 		products.findFirst();
 		while (!products.last()) {
@@ -137,36 +137,37 @@ public class Products {
 			products.findNext();
 		}
 
-		// check last item
+		// check last element
 		if (products.retrieve().getStock() == 0)
 			outOfStock.insert(products.retrieve());
 
-		return outOfStock; // return list of out-of-stock products
+		return outOfStock;
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Add a customer review to this product
+	// Add a review to the product
+
 	public void addReview(Reviews review) {
-		reviewsList.insert(review); // insert into this product's review list
+		reviewsList.insert(review);
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Print top 3 products based on their average ratings
+
 	public static void printTop3() {
+
 		if (products.empty()) {
 			System.out.println("No products found.");
 			return;
 		}
 
-		// Variables to track top 3 products
+		// Track top 3 products
 		Products first = null, second = null, third = null;
 
 		products.findFirst();
 		while (true) {
 			Products pr = products.retrieve();
 			int avg = pr.averageRating();
-
-			// rank product by rating
 			if (first == null || avg > first.averageRating()) {
 				third = second; 
 				second = first; 
@@ -178,19 +179,23 @@ public class Products {
 				third = pr;
 			}
 
-			if (products.last()) break;
+			if (products.last())
+				break;
 			products.findNext();
 		}
 
-		// Print results
 		System.out.println("Top 3 products by average rating:");
-		if (first != null) System.out.println(first + " || Avg Rating: " + first.averageRating());
-		if (second != null) System.out.println(second + " || Avg Rating: " + second.averageRating());
-		if (third != null) System.out.println(third + " || Avg Rating: " + third.averageRating());
+		if (first != null) 
+			System.out.println(first + " || Avg Rating: " + first.averageRating());
+		if (second != null) 
+			System.out.println(second + " || Avg Rating: " + second.averageRating());
+		if (third != null) 
+			System.out.println(third + " || Avg Rating: " + third.averageRating());
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Find common products highly rated (>4) by two given customers
+	// Find common products highly rated that are greater than 4/5 by two given customers
+
 	public static void printCommonHighlyRated(int cid1, int cid2) {
 		LinkedList<Products> common = new LinkedList<>();
 		LinkedList<Reviews> reviewsAll = Reviews.getReviews();
@@ -204,7 +209,6 @@ public class Products {
 				if (r.getCustomerId() == cid1 || r.getCustomerId() == cid2) {
 					Products pr = Products.searchById(r.getProductId());
 
-					// Check product rating > 4
 					if (pr != null && pr.averageRating() > 4) {
 						boolean c1 = false, c2 = false;
 
@@ -213,14 +217,17 @@ public class Products {
 						while (true) {
 							Reviews r2 = reviewsAll.retrieve();
 							if (r2.getProductId() == pr.getProductId()) {
-								if (r2.getCustomerId() == cid1) c1 = true;
-								if (r2.getCustomerId() == cid2) c2 = true;
+								if (r2.getCustomerId() == cid1)
+									c1 = true;
+								if (r2.getCustomerId() == cid2)
+									c2 = true;
 							}
-							if (reviewsAll.last()) break;
+							if (reviewsAll.last())
+								break;
 							reviewsAll.findNext();
 						}
 
-						// Insert product if both reviewed it and it’s not already in list
+						// Insert product if both reviews are the same and it’s not already in list
 						if (c1 && c2) {
 							boolean exists = false;
 							if (!common.empty()) {
@@ -230,21 +237,23 @@ public class Products {
 										exists = true;
 										break;
 									}
-									if (common.last()) break;
+									if (common.last())
+										break;
 									common.findNext();
 								}
 							}
-							if (!exists) common.insert(pr);
+							if (!exists)
+								common.insert(pr);
 						}
 					}
 				}
 
-				if (reviewsAll.last()) break;
+				if (reviewsAll.last())
+					break;
 				reviewsAll.findNext();
 			}
 		}
 
-		// Print results
 		System.out.println("--- Common highly-rated products ---");
 		if (!common.empty()) {
 			common.findFirst();
@@ -259,47 +268,55 @@ public class Products {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Compute the average rating for this product (based on all reviews)
+	// Compute the average rating for a certain product
+
+	int sum = 0;
+
 	public int averageRating() {
-		if (reviewsList.empty()) return 0;
+		if (reviewsList.empty())
+			return sum; // no reviews
 
-		int sum = 0;
 		reviewsList.findFirst();
-
-		// add all ratings except last
 		while (!reviewsList.last()) {
 			sum += reviewsList.retrieve().getRatingScore();
 			reviewsList.findNext();
 		}
-
-		// add last review rating
+		// for the last review rating
 		sum += reviewsList.retrieve().getRatingScore();
+		return sum / reviewsList.getSize();	// Average = sum of reviews/number of reviews
 
-		// calculate mean rating
-		return sum / reviewsList.getSize();
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Convert product details into readable string form for display
+	
 	public String toString() {
-		return "Product ID: " + productId + 
-				" || Name: " + name + 
-				" || Price: " + price + 
-				" || Stock: " + stock;
+		return "Product ID: " + productId + " || Name: " + name + " || Price: " + price + " || Stock: " + stock;
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Getters and Setters
-	public int getProductId() { return productId; }
-	public String getName() { return name; }
-	public double getPrice() { return price; }
-	public int getStock() { return stock; }
-	public void setPrice(double price) { this.price = price; }
-	public void setStock(int stock) { this.stock = stock; }
-	public LinkedList<Reviews> getReviewsList() { return reviewsList; }
+	// Setters and getters
+	
+	public int getProductId() { 
+		return productId; }
+	
+	public String getName() { 
+		return name; }
+	
+	public double getPrice() { 
+		return price; }
+	
+	public int getStock() { 
+		return stock; }
+	
+	public void setPrice(double price) { 
+		this.price = price; }
+	
+	public void setStock(int stock) { 
+		this.stock = stock; }
+	
+	public LinkedList<Reviews> getReviewsList() { 
+		return reviewsList; }
 
-	//----------------------------------------------------------------------------------//
-	// Return reference to global list of all products (used by Inventory)
 	public static LinkedList<Products> getProducts() { 
 		return products; 
 	}
