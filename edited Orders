@@ -2,194 +2,197 @@ package project212;
 
 public class Orders {
 
-    //----------------------------------------------------------------------------------//
-    // Static list holding all orders made in the system (shared by everyone)
-    // This acts as the central database for orders, used by Inventory and Customers
-    private static LinkedList<Orders> orders = new LinkedList<>();
+	// Static list holding all orders made in the system
+	private static LinkedList<Orders> orders = new LinkedList<>();
 
-    // Each individual order contains its own list of products
-    private LinkedList<Products> productsList;
+	// Each order contains its own list of products
+	private LinkedList<Products> productsList;
 
-    // Order attributes
-    private int orderId;
-    private int customerId;      // ID of the customer who made the order
-    private Customers customer;  // actual reference to the customer object
-    private double totalPrice;   // total cost of all products in this order
-    private String orderDate;    // format: YYYY-MM-DD
-    private String status;       // examples: "Pending", "Shipped", "Canceled"
+	// attributes
+	private int orderId;		 // ID of the order
+	private int customerId;      // ID of the customer who made the order
+	private Customers customer;  // reference to the customer object
+	private double totalPrice;   // total cost of all products in this order
+	private String orderDate;    // format: YYYY-MM-DD
+	private String status;       // status of the order: Canceled, Pending, etc...
 
-    //----------------------------------------------------------------------------------//
-    // Constructor: initializes a new order with basic details
-    public Orders(int orderId, int customerId, double totalPrice, String orderDate, String status) {
-        this.orderId = orderId;             // unique order ID
-        this.customerId = customerId;       // link to customer ID
-        this.totalPrice = totalPrice;       // store total price
-        this.orderDate = orderDate;         // store order date
-        this.status = status;               // set current order status
-        this.productsList = new LinkedList<>(); // initialize empty product list for this order
-    }
+	// Constructor:
+	public Orders(int orderId, int customerId, double totalPrice, String orderDate, String status) {
+		this.orderId = orderId;             
+		this.customerId = customerId;       
+		this.totalPrice = totalPrice;       
+		this.orderDate = orderDate;        
+		this.status = status;              
+		this.productsList = new LinkedList<>();
+	}
 
-    //----------------------------------------------------------------------------------//
-    // Create a new order in the system and link it to the customer
-    public void createOrder(Orders order) {
+	//----------------------------------------------------------------------------------//
+	// Create a new order in the system 
+	public void createOrder(Orders order) {
 
-        // Check if an order with the same ID already exists in the system
-        if (searchById(order.getOrderId()) != null) {
-            System.out.println("Order already exists");
-            return;
-        }
+		// Check if an order with the same ID exists in the system
+		if (searchById(order.getOrderId()) != null) {
+			System.out.println("Order already exists");
+			return;
+		}
 
-        // Add the new order to the global orders list
-        orders.insert(order);
+		// Add the new order to the static orders list
+		orders.insert(order);
 
-        // Add the order to the specific customer's personal order list
-        if (order.getCustomer() != null) {
-            order.getCustomer().placeOrder(order);  // ensures order is recorded under the correct customer
-        } else {
-            // This case happens if no customer object was linked
-            System.out.println("Warning: Order has no associated customer");
-        }
+		// Add the order to the customer's own order list
+		if (order.getCustomer() != null) {
+			order.getCustomer().placeOrder(order);  // To link the customer to his order list
+		} else {
+			System.out.println("Order has no associated customer");
+		}
 
-    }
+	}
 
-    //----------------------------------------------------------------------------------//
-    // Cancel an existing order (only if still pending)
-    public static void cancelOrder(int orderId) {
-        // Find order by ID
-        Orders canceledOrder = searchById(orderId);
+	//----------------------------------------------------------------------------------//
+	// Cancel an existing order (only if still pending)
 
-        // If not found, display message
-        if (canceledOrder == null) {
-            System.out.println("No order found with this ID");
-            return;
-        }
+	public static void cancelOrder(int orderId) {
+		// Find order by ID
+		Orders canceledOrder = searchById(orderId);
 
-        // Only pending orders can be canceled
-        if (!canceledOrder.getStatus().equalsIgnoreCase("Pending")) {
-            System.out.println("You can't cancel an order after it has been shipped");
-            return;
-        }
+		if (canceledOrder == null) {
+			System.out.println("No order found with this ID");
+			return;
+		}
 
-        // Update order status to "Canceled"
-        canceledOrder.setStatus("Canceled");
-        System.out.println("Order canceled successfully");
-    }
+		// Only pending orders can be canceled
+		if (!canceledOrder.getStatus().equalsIgnoreCase("Pending")) {
+			System.out.println("You can't cancel an order after it has been shipped");
+			return;
+		}
 
-    //----------------------------------------------------------------------------------//
-    // Update the status of an existing order (e.g., Pending → Shipped)
-    public static void updateStatus(int orderId, String status) {
-        // Find the order
-        Orders updatedOrder = searchById(orderId);
+		// Set order status to "Canceled"
+		canceledOrder.setStatus("Canceled");
+		System.out.println("Order canceled successfully");
+	}
 
-        // If not found, show error
-        if (updatedOrder == null) {
-            System.out.println("No order found with this ID");
-            return;
-        }
+	//----------------------------------------------------------------------------------//
+	// Update the status of an order
 
-        // Update order status
-        updatedOrder.setStatus(status);
-        System.out.println("Order status updated successfully");
-    }
+	public static void updateStatus(int orderId, String status) {
+		// Find the order by id
+		Orders updatedOrder = searchById(orderId);
 
-    //----------------------------------------------------------------------------------//
-    // Search for an order by its unique ID
-    public static Orders searchById(int orderId) {
-        if (orders.empty()) return null; // if no orders exist, return null
+		if (updatedOrder == null) {
+			System.out.println("No order found with this ID");
+			return;
+		}
 
-        orders.findFirst();
-        // Iterate through the list until we find the matching order ID
-        while (!orders.last()) {
-            if (orders.retrieve().getOrderId() == orderId)
-                return orders.retrieve(); // match found
-            orders.findNext();             // move to next order
-        }
+		// Set order status
+		updatedOrder.setStatus(status);
+		System.out.println("Order status updated successfully");
+	}
 
-        // Check the last order in the list
-        if (orders.retrieve().getOrderId() == orderId)
-            return orders.retrieve();
+	//----------------------------------------------------------------------------------//
+	// Search for an order by id
 
-        // If no match found at all
-        return null;
-    }
+	public static Orders searchById(int orderId) {
+		if (orders.empty()) // if no orders exist
+			return null; 
 
-    //----------------------------------------------------------------------------------//
-    // Retrieve all orders made between two specific dates
-    // Dates must be in the format YYYY-MM-DD
-    public static LinkedList<Orders> getOrdersBetweenDates(String date1, String date2) {
-        // Create a new list to hold matching orders
-        LinkedList<Orders> ordersBetweenDates = new LinkedList<>();
+		orders.findFirst();
+		while (!orders.last()) {   // Go through the list until we find the matching order ID
+			if (orders.retrieve().getOrderId() == orderId)
+				return orders.retrieve(); 
+			orders.findNext();   
+		}
 
-        if (orders.empty()) return ordersBetweenDates;
+		// Check for the last order in the list
+		if (orders.retrieve().getOrderId() == orderId)
+			return orders.retrieve();
 
-        // Convert both date strings into integers to make comparison easier
-        int d1 = Integer.parseInt(date1.replace("-", ""));
-        int d2 = Integer.parseInt(date2.replace("-", ""));
+		return null;
+	}
 
-        // Loop through all orders
-        orders.findFirst();
-        while (true) {
-            String date = orders.retrieve().getOrderDate();
-            int d = Integer.parseInt(date.replace("-", "")); // convert order date to comparable number
+	//----------------------------------------------------------------------------------//
+	// Get all orders made between two dates in the format YYYY-MM-DD
 
-            // If order date is between date1 and date2 (inclusive), add it to results
-            if (d >= d1 && d <= d2) {
-                ordersBetweenDates.insert(orders.retrieve());
-            }
+	public static LinkedList<Orders> getOrdersBetweenDates(String date1, String date2) {
+		LinkedList<Orders> ordersBetweenDates = new LinkedList<>(); // A new list to hold matching orders
 
-            if (orders.last()) break; // stop at the end
-            orders.findNext();
-        }
+		if (orders.empty()) 
+			return ordersBetweenDates;
 
-        return ordersBetweenDates; // return list of matching orders
-    }
+		// Edit both date strings into integers for comparison
+		int d1 = Integer.parseInt(date1.replace("-", ""));
+		int d2 = Integer.parseInt(date2.replace("-", ""));
 
-    //----------------------------------------------------------------------------------//
-    // Convert an order into a readable string format for display
-    // Includes order details and the product IDs in this order
-    public String toString() {
-        String productIds = "No products";
+		orders.findFirst();
+		while (true) {
+			String date = orders.retrieve().getOrderDate();
+			int d = Integer.parseInt(date.replace("-", "")); 
+			if (d >= d1 && d <= d2)  // If order date is between date1 and date2 add it to the list
+				ordersBetweenDates.insert(orders.retrieve());
+			if (orders.last()) 
+				break; 
+			orders.findNext();
+		}
+		return ordersBetweenDates;
+	}
 
-        // Collect all product IDs if the list is not empty
-        if (!productsList.empty()) {
-            productIds = "";
-            productsList.findFirst();
+	//----------------------------------------------------------------------------------//
 
-            // Loop through all but the last product
-            while (!productsList.last()) {
-                productIds += productsList.retrieve().getProductId() + ";";
-                productsList.findNext();
-            }
+	public String toString() {
+		String productIds = "No products";
 
-            // Add the last product
-            productIds += productsList.retrieve().getProductId();
-        }
+		if (!productsList.empty()) { // Collect all product IDs if the list is not empty
+			productIds = "";
+			productsList.findFirst();
 
-        // Format all order info as one string
-        return "Order ID: " + orderId +
-                " || Customer ID: " + customerId +
-                " || Products: " + productIds +
-                " || Total Price: " + totalPrice +
-                " || Order Date: " + orderDate +
-                " || Status: " + status;
-    }
+			while (!productsList.last()) {
+				productIds += productsList.retrieve().getProductId() + ";";
+				productsList.findNext();
+			}
+			productIds += productsList.retrieve().getProductId(); // Add the last product
+		}
 
-    //----------------------------------------------------------------------------------//
-    // Getters and setters: provide controlled access to private fields
-    public int getOrderId() { return orderId; }
-    public int getCustomerId() { return customerId; }
-    public Customers getCustomer() { return customer; }
-    public void setCustomer(Customers customer) { this.customer = customer; }
-    public double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
-    public String getOrderDate() { return orderDate; }
-    public void setOrderDate(String orderDate) { this.orderDate = orderDate; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public LinkedList<Products> getProductsList() { return productsList; }
-    public void setProductsList(LinkedList<Products> productsList) { this.productsList = productsList; }
+		return "Order ID: " + orderId +" || Customer ID: " + customerId +" || Products: " + productIds +" || Total Price: " + totalPrice +" || Order Date: " + orderDate +" || Status: " + status;
+	}
 
-    //----------------------------------------------------------------------------------//
-    // Static getter: allows Inventory or other classes to access the global orders list
-    public static LinkedList<Orders> getOrders() { return orders; }
+	//----------------------------------------------------------------------------------//
+	// Getters and setters
+	public int getOrderId() { 
+		return orderId;}
+
+	public int getCustomerId() { 
+		return customerId; }
+
+	public Customers getCustomer() { 
+		return customer; }
+
+	public void setCustomer(Customers customer) { 
+		this.customer = customer; }
+
+	public double getTotalPrice() { 
+		return totalPrice; }
+
+	public void setTotalPrice(double totalPrice) { 
+		this.totalPrice = totalPrice; }
+
+	public String getOrderDate() { 
+		return orderDate; }
+
+	public void setOrderDate(String orderDate) { 
+		this.orderDate = orderDate; }
+
+	public String getStatus() { 
+		return status; }
+
+	public void setStatus(String status) { 
+		this.status = status; }
+
+	public LinkedList<Products> getProductsList() { 
+		return productsList; }
+
+	public void setProductsList(LinkedList<Products> productsList) { 
+		this.productsList = productsList; }
+
+	public static LinkedList<Orders> getOrders() { 
+		return orders; }
+
 }
