@@ -5,12 +5,14 @@ public class Reviews {
 	// Static list holding all reviews made in the system
 	private static LinkedList<Reviews> reviews = new LinkedList<>();
 
+	// Attributes
 	private int reviewId;      // review ID for each review
 	private int productId;     // ID of the reviewed product
 	private int customerId;    // ID of the customer who wrote the review
 	private int ratingScore;   //  rating from 1 to 5
 	private String textComment; // comment on the review
 
+	// Constructor
 	public Reviews(int reviewId, int productId, int customerId, int ratingScore, String textComment) {
 		this.reviewId = reviewId;
 		this.productId = productId;
