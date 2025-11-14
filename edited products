@@ -270,9 +270,10 @@ public class Products {
 	//----------------------------------------------------------------------------------//
 	// Compute the average rating for a certain product
 
-	int sum = 0;
+	
 
 	public int averageRating() {
+		int sum = 0;
 		if (reviewsList.empty())
 			return sum; // no reviews
 
