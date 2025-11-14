@@ -1,0 +1,311 @@
+package project212;
+
+import java.util.Scanner;
+
+public class Inventory {
+
+	public static void main(String args[]) {
+
+		Scanner input = new Scanner(System.in);
+
+		//----------------------------------------------------------------------------------//
+		// Load CSV data using class DataLoader
+
+		DataLoader.loadCustomers("customers.csv");   
+		DataLoader.loadProducts("prodcuts.csv");     
+		DataLoader.loadOrders("orders.csv");
+		DataLoader.loadReviews("reviews.csv");
+
+		//----------------------------------------------------------------------------------//
+		// Main menu
+
+		int choice = -1;
+		while (choice != 0) { 
+
+			// Main menu options
+			System.out.println("\n--- E-Commerce Inventory & Order System ---");
+			System.out.println("1. Register Customer");
+			System.out.println("2. View All Customers");
+			System.out.println("3. Add Product");
+			System.out.println("4. View All Products");
+			System.out.println("5. Place Order");
+			System.out.println("6. View All Orders");
+			System.out.println("7. Add Review");
+			System.out.println("8. View All Reviews");
+			System.out.println("9. Extract all reviews from a specific customer");
+			System.out.println("10. Top 3 products by average rating");
+			System.out.println("11. All orders between two dates");
+			System.out.println("12. Common highly-rated products between two customers");
+			System.out.println("13. Cancel an Order");
+			System.out.println("14. Update Order Status");
+			System.out.println("15. Track Out-of-Stock Products");
+			System.out.println("16. Search Products by Name");
+			System.out.println("0. Exit");
+			System.out.print("Enter your choice: ");
+
+			choice = input.nextInt();
+			input.nextLine(); // cleaning garbage
+
+			switch (choice) {
+
+			//----------------------------------------------------------------------------------//
+			case 1: // Register a new customer
+
+				addACustomer(input);
+				break; 
+				
+				//----------------------------------------------------------------------------------//
+			case 2: // View all registered customers
+
+				printLinkedList(Customers.customers);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 3: // Add a new product to inventory
+
+				addAProduct(input);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 4: // View all products in inventory
+
+				printLinkedList(Products.getProducts());
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 5: // Place a new order
+
+				placeOrder(input);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 6: // View all orders
+
+				printLinkedList(Orders.getOrders()); 
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 7: // Add a review for a product
+
+				addReview(input);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 8: // View all reviews
+
+				printLinkedList(Reviews.getReviews());
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 9: // Extract reviews from a specific customer
+
+				extractCustomerReviews(input);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 10: // Display top 3 products based on average rating
+
+				Products.printTop3();
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 11: // Display orders between two dates
+
+				System.out.print("Enter start date (YYYY-MM-DD): ");
+				String start = input.nextLine();
+				System.out.print("Enter end date (YYYY-MM-DD): ");
+				String end = input.nextLine();
+				printLinkedList(Orders.getOrdersBetweenDates(start, end));
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 12: // Show common highly-rated products between two customers
+
+				System.out.print("Enter first Customer ID: ");
+				int cid1 = input.nextInt();
+				System.out.print("Enter second Customer ID: ");
+				int cid2 = input.nextInt();
+				input.nextLine();
+				Products.printCommonHighlyRated(cid1, cid2);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 13: // Cancel an order by order ID
+
+				System.out.print("Enter Order ID to cancel: ");
+				int cancelId = input.nextInt();
+				input.nextLine();
+				Orders.cancelOrder(cancelId); 
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 14: // Update status of an existing order
+
+				System.out.print("Enter Order ID: ");
+				int upId = input.nextInt();
+				input.nextLine();
+				System.out.print("Enter new status: ");
+				String newStatus = input.nextLine();
+				Orders.updateStatus(upId, newStatus);
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 15: // Track out-of-stock products
+
+				// Prints products with stock = 0
+				printLinkedList(Products.trackOutOfStock());
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 16: // Search products by name
+
+				System.out.print("Enter product name: ");
+				String keyword = input.nextLine();
+				printLinkedList(Products.searchByName(keyword));
+				break;
+
+				//----------------------------------------------------------------------------------//
+			case 0: // Exit program
+
+				System.out.println("Exiting system...");
+				break;
+
+			default: // Invalid choice
+
+				System.out.println("Invalid choice, try again.");
+				break;
+			}
+		}
+
+		input.close(); // Close scanner
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Helper method to print any linked list
+
+	public static <T> void printLinkedList(LinkedList<T> list) {
+		if (list == null || list.empty()) { // check if the list is null or empty
+			System.out.println("No data found.");
+			return;
+		}
+		list.findFirst(); 
+		while (!list.last()) { 
+			System.out.println(list.retrieve());
+			list.findNext();
+		}
+		System.out.println(list.retrieve()); // for the last element
+	}
+	
+	//----------------------------------------------------------------------------------//
+	// Helper method to add a product
+	
+	public static void addAProduct(Scanner input) {
+
+		System.out.print("Enter Product ID: ");
+		int pid = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Product Name: ");
+		String pname = input.nextLine();
+		System.out.print("Enter Price: ");
+		double price = input.nextDouble();
+		System.out.print("Enter Stock Quantity: ");
+		int stock = input.nextInt();
+		Products.addProducts(new Products(pid, pname, price, stock));
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Helper method to add a customer
+	public static void addACustomer(Scanner input) {
+
+		System.out.print("Enter Customer ID: ");
+		int cid = input.nextInt();
+		input.nextLine(); // cleaning garbage
+		System.out.print("Enter Name: ");
+		String cname = input.nextLine();
+		System.out.print("Enter Email: ");
+		String cemail = input.nextLine();
+		Customers.registerCustomer(new Customers(cid, cname, cemail));
+		System.out.println("Customer registered successfully.");
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Helper method for placing an order
+
+	public static void placeOrder(Scanner input) {
+		System.out.print("Enter Order ID: ");
+		int oid = input.nextInt();
+		System.out.print("Enter Customer ID: ");
+		int oCid = input.nextInt();
+		input.nextLine();
+
+		Customers cust = Customers.searchById(oCid); // find customer by ID
+		if (cust == null) {
+			System.out.println("Customer not found!");
+			return;
+		}
+
+		Orders order = new Orders(oid, oCid, 0, "2025-11-13", "Pending");
+		order.setCustomer(cust); // link order to customer
+
+		System.out.print("Enter Product IDs (comma separated): ");
+		String prodInput = input.nextLine();
+		String[] prodIds = prodInput.split(",");
+
+		double total = 0; // total price of order
+		for (String pidStr : prodIds) { // iterate through product IDs
+			int pID = Integer.parseInt(pidStr.trim());
+			Products prod = Products.searchById(pID); // find product
+			if (prod != null) {
+				order.getProductsList().insert(prod); // add product to order
+				total += prod.getPrice(); // add price to total
+			} else 
+				System.out.println("Product ID " + pID + " not found");
+		}
+
+		order.setTotalPrice(total); // set total order price
+		order.createOrder(order); // save order to the static list and customer's orders
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Helper method to add a review
+	
+	public static void addReview(Scanner input) {
+		System.out.print("Enter Customer ID: ");
+		int revCid = input.nextInt();
+		input.nextLine();
+		Customers customerRev = Customers.searchById(revCid); // find the customer
+		if (customerRev == null) {
+			System.out.println("Customer not found!");
+			return;
+		}
+		System.out.print("Enter Product ID: ");
+		int revPid = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Rating (1-5): ");
+		int rating = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Comment: ");
+		String comment = input.nextLine();
+		customerRev.addReview(revPid, rating, comment);
+	}
+	//----------------------------------------------------------------------------------//
+	//Helper method to extract reviews from a customer
+	
+	public static void extractCustomerReviews(Scanner input) {
+	    
+		System.out.print("Enter Customer ID: ");
+		int custId = input.nextInt();
+		input.nextLine();
+		LinkedList<Reviews> allReviews = Reviews.getReviews(); // get static reviews list
+		if (!allReviews.empty()) { //
+			allReviews.findFirst(); 
+			while (true) {
+				Reviews r = allReviews.retrieve();
+				if (r.getCustomerId() == custId) System.out.println(r); // print only reviews by this customer
+				if (allReviews.last()) break; // stop when last element is reached
+				allReviews.findNext(); 
+			}
+		} else System.out.println("No reviews found.");
+	}
+
+}
